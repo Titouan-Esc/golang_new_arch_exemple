@@ -11,6 +11,21 @@ type UserRepository struct {
 	SQLHandler handler.SQLHandler
 }
 
+func (u UserRepository) FindByEmail(mail string) (model.Model, error) {
+	var user model.Model
+
+	rows, err := u.SQLHandler.Query(`SELECT * FROM "user" WHERE "email" = $1`, mail)
+	defer rows.Close()
+
+	for rows.Next() {
+		if err = rows.Scan(&user.Id, &user.Name, &user.Email, &user.Password); err != nil {
+			return model.Model{}, err
+		}
+	}
+
+	return user, nil
+}
+
 func (u UserRepository) Login(user model.Model) (string, error) {
 	//TODO implement me
 	panic("implement me")

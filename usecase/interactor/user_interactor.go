@@ -33,3 +33,8 @@ func (ui *UserInteractor) Connect(user model.Model) (token string, err error) {
 	token, err = ui.UserRepository.Login(user)
 	return
 }
+
+func (ui *UserInteractor) ShowByEmail(mail string) (user model.Model, err error) {
+	user, err = ui.UserRepository.FindByEmail(mail)
+	return
+}

@@ -3,11 +3,11 @@ package controller
 import (
 	"encoding/json"
 	"exemple.com/swagTest/domain/model"
-	"exemple.com/swagTest/infra/adapter"
+	"exemple.com/swagTest/infra/controller"
 	"exemple.com/swagTest/interfaces/handler"
 	"exemple.com/swagTest/interfaces/repository"
+	"exemple.com/swagTest/middlewares"
 	"exemple.com/swagTest/usecase/interactor"
-	"log"
 	"net/http"
 )
 
@@ -43,11 +43,31 @@ func (uc *UserController) Store(res http.ResponseWriter, req *http.Request) {
 }
 
 func (uc *UserController) Connect(res http.ResponseWriter, req *http.Request) {
-	manager := adapter.NewAdapter[model.Model](res, req)
+	// Init controller
+	manager := controller.NewController[model.Model](res, req, false)
 	if manager.Errors.Error {
-		manager.StopRequest()
+		manager.StopRequest(http.StatusForbidden)
 		return
 	}
 
-	log.Println(manager.Body)
+	// Get User with his email
+	user, err := uc.UserInteractor.ShowByEmail(manager.Body.Email)
+	if err != nil {
+		manager.Respons().Build(http.StatusForbidden, err.Error())
+		return
+	}
+
+	// Check password
+	if ok := middlewares.ValidateEncrypt(manager.Body.Password, user.Password); !ok {
+		manager.Respons().Build(http.StatusBadRequest, "Bad Password")
+		return
+	}
+
+	// Generate token
+	token, err := middlewares.GenerateJWT(manager.Body.Email)
+	if err != nil {
+		manager.Respons().Build(http.StatusConflict, err.Error())
+		return
+	}
+	manager.Respons().Build(http.StatusOK, token)
 }
