@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func NewController[T model.Model | map[string]interface{}](res http.ResponseWriter, req *http.Request, token ...bool) *manager.Manager[T] {
+func NewController[T model.User | map[string]interface{}](res http.ResponseWriter, req *http.Request, token ...bool) *manager.Manager[T] {
 	var newManager *manager.Manager[T]
 	newManager = manager.NewManager[T](res, req)
 

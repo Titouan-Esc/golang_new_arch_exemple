@@ -1,59 +1,36 @@
 package handler
 
 import (
-	"database/sql"
-	"exemple.com/swagTest/interfaces/handler"
-	_ "github.com/lib/pq"
+	"exemple.com/swagTest/config"
+	"fmt"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type SQLHandler struct {
-	Conn *sql.DB
+	Db *gorm.DB
 }
 
-type Rows struct {
-	Rows *sql.Rows
-}
+func NewSQLHandler() (SQLHandler, error) {
+	var sqlHandler SQLHandler
 
-func NewSQLHandler() (handler.SQLHandler, error) {
-	sqlHandler := &SQLHandler{}
+	data, _ := config.LoadConfig()
 
-	dsn := "host=localhost port=5432 password=postgres dbname=test sslmode=disable search_path=public"
+	dsn := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable search_path=public",
+		data.Db.Host,
+		data.Db.Port,
+		data.Db.User,
+		data.Db.Password,
+		data.Db.DBName,
+	)
 
-	conn, err := sql.Open("postgres", dsn)
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return nil, err
+		return sqlHandler, err
 	}
 
-	if err = conn.Ping(); err != nil {
-		return nil, err
-	}
+	sqlHandler.Db = db
 
-	sqlHandler.Conn = conn
-
-	return sqlHandler, err
-}
-
-func (S SQLHandler) Query(query string, args ...interface{}) (handler.Row, error) {
-	rows, err := S.Conn.Query(query, args...)
-	if err != nil {
-		return nil, err
-	}
-
-	row := &Rows{
-		Rows: rows,
-	}
-
-	return row, err
-}
-
-func (r Rows) Scan(value ...interface{}) error {
-	return r.Rows.Scan(value...)
-}
-
-func (r Rows) Close() error {
-	return r.Rows.Close()
-}
-
-func (r Rows) Next() bool {
-	return r.Rows.Next()
+	return sqlHandler, nil
 }

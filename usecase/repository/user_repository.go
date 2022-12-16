@@ -3,10 +3,10 @@ package repository
 import "exemple.com/swagTest/domain/model"
 
 type UserRepository interface {
-	Find(uid string) (model.Model, error)
-	FindByEmail(mail string) (model.Model, error)
-	Create(model model.Model) (string, error)
-	Update(model model.Model) (string, error)
+	Find(uid string) (model.User, error)
+	FindByEmail(mail string) (model.User, error)
+	Create(model model.User) (string, error)
+	Update(model model.User) (string, error)
 	Delete(uid string) (string, error)
-	Login(user model.Model) (string, error)
+	Login(user model.User) (string, error)
 }

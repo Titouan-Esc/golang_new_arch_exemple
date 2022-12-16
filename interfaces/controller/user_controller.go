@@ -1,10 +1,9 @@
 package controller
 
 import (
-	"encoding/json"
 	"exemple.com/swagTest/domain/model"
 	"exemple.com/swagTest/infra/controller"
-	"exemple.com/swagTest/interfaces/handler"
+	"exemple.com/swagTest/infra/handler"
 	"exemple.com/swagTest/interfaces/repository"
 	"exemple.com/swagTest/middlewares"
 	"exemple.com/swagTest/usecase/interactor"
@@ -26,27 +25,26 @@ func NewUserController(sqlHandler handler.SQLHandler) *UserController {
 }
 
 func (uc *UserController) Store(res http.ResponseWriter, req *http.Request) {
-	var user model.Model
-	json.NewDecoder(req.Body).Decode(&user)
-
-	uid, err := uc.UserInteractor.Store(user)
-	if err != nil {
-		res.Header().Set("Content-Type", "application/json")
-		res.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(res).Encode(err.Error())
+	manager := controller.NewController[model.User](res, req, false)
+	if manager.Errors.Error {
+		manager.StopRequest()
 		return
 	}
 
-	res.Header().Set("Content-Type", "application/json")
-	res.WriteHeader(http.StatusOK)
-	json.NewEncoder(res).Encode(uid)
+	uid, err := uc.UserInteractor.Store(manager.Body)
+	if err != nil {
+		manager.Respons().Build(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	manager.Respons().Build(http.StatusOK, uid)
 }
 
 func (uc *UserController) Connect(res http.ResponseWriter, req *http.Request) {
 	// Init controller
-	manager := controller.NewController[model.Model](res, req, false)
+	manager := controller.NewController[model.User](res, req, false)
 	if manager.Errors.Error {
-		manager.StopRequest(http.StatusForbidden)
+		manager.StopRequest()
 		return
 	}
 
@@ -70,4 +68,20 @@ func (uc *UserController) Connect(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	manager.Respons().Build(http.StatusOK, token)
+}
+
+func (uc *UserController) Show(res http.ResponseWriter, req *http.Request) {
+	manager := controller.NewController[model.User](res, req)
+	if manager.Errors.Error {
+		manager.StopRequest()
+		return
+	}
+
+	user, err := uc.UserInteractor.Show(manager.Body.ID)
+	if err != nil {
+		manager.Respons().Build(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	manager.Respons().Build(http.StatusOK, user)
 }

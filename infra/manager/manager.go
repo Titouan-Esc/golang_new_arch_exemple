@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-type Manager[T model.Model | map[string]interface{}] struct {
+type Manager[T model.User | map[string]interface{}] struct {
 	Body        T
 	Errors      errors.ErrorsEntity
 	Response    http.ResponseWriter
@@ -15,8 +15,8 @@ type Manager[T model.Model | map[string]interface{}] struct {
 }
 
 type Respons struct {
-	Res http.ResponseWriter
-	ResponsBody
+	Res  http.ResponseWriter
+	Body ResponsBody
 }
 
 type ResponsBody struct {
@@ -25,7 +25,7 @@ type ResponsBody struct {
 	Data    []interface{}
 }
 
-func NewManager[T model.Model | map[string]interface{}](res http.ResponseWriter, req *http.Request) *Manager[T] {
+func NewManager[T model.User | map[string]interface{}](res http.ResponseWriter, req *http.Request) *Manager[T] {
 	var data T
 	json.NewDecoder(req.Body).Decode(&data)
 
@@ -35,9 +35,9 @@ func NewManager[T model.Model | map[string]interface{}](res http.ResponseWriter,
 	}
 }
 
-func (m *Manager[T]) StopRequest(status int) {
+func (m *Manager[T]) StopRequest() {
 	m.Response.Header().Set("Content-Type", "application/json")
-	m.Response.WriteHeader(status)
+	m.Response.WriteHeader(http.StatusBadRequest)
 
 	json.NewEncoder(m.Response).Encode(m.Errors.Errors)
 }
@@ -56,12 +56,12 @@ func (r *Respons) Build(status int, data ...interface{}) {
 	r.Res.Header().Set("Content-Type", "application/json")
 	r.Res.WriteHeader(status)
 
-	r.Success = true
+	r.Body.Success = true
 	if status >= 400 {
-		r.Success = false
+		r.Body.Success = false
 	}
-	r.Status = status
-	r.Data = data
+	r.Body.Status = status
+	r.Body.Data = data
 
-	json.NewEncoder(r.Res).Encode(r.ResponsBody)
+	json.NewEncoder(r.Res).Encode(r.Body)
 }

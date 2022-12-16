@@ -1,8 +1,8 @@
 package router
 
 import (
+	"exemple.com/swagTest/infra/handler"
 	"exemple.com/swagTest/interfaces/controller"
-	"exemple.com/swagTest/interfaces/handler"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	"net/http"
