@@ -9,5 +9,5 @@ type DB struct {
 	Port     string `json:"port"`
 	Password string `json:"password"`
 	User     string `json:"user"`
-	DBName   string `json:"db_name"`
+	DBName   string `json:"dbname"`
 }

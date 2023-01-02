@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"exemple.com/swagTest/config"
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -14,15 +13,13 @@ type SQLHandler struct {
 func NewSQLHandler() (SQLHandler, error) {
 	var sqlHandler SQLHandler
 
-	data, _ := config.LoadConfig()
-
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable search_path=public",
-		data.Db.Host,
-		data.Db.Port,
-		data.Db.User,
-		data.Db.Password,
-		data.Db.DBName,
+		"localhost",
+		"5432",
+		"postgres",
+		"postgres",
+		"test",
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})

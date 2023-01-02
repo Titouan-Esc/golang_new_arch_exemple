@@ -2,11 +2,21 @@ package interactor
 
 import (
 	"exemple.com/swagTest/domain/model"
+	"exemple.com/swagTest/infra/handler"
+	repository2 "exemple.com/swagTest/interfaces/repository"
 	"exemple.com/swagTest/usecase/repository"
 )
 
 type UserInteractor struct {
 	UserRepository repository.UserRepository
+}
+
+func NewUserInteractor(handle handler.SQLHandler) *UserInteractor {
+	return &UserInteractor{
+		UserRepository: repository2.UserRepository{
+			SQLHandler: handle,
+		},
+	}
 }
 
 func (ui *UserInteractor) Store(user model.User) (id string, err error) {

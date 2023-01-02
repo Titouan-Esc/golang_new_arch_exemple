@@ -3,6 +3,7 @@ package config
 import (
 	"exemple.com/swagTest/domain/model"
 	"github.com/spf13/viper"
+	"log"
 )
 
 func LoadConfig() (model.Env, error) {
@@ -22,6 +23,8 @@ func LoadConfig() (model.Env, error) {
 	if err := vp.Unmarshal(&env); err != nil {
 		return env, err
 	}
+
+	log.Println(env)
 
 	return env, nil
 }
