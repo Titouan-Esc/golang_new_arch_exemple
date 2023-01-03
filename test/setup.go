@@ -1,22 +1,26 @@
 package test
 
 import (
-	"exemple.com/swagTest/domain/model"
 	handler2 "exemple.com/swagTest/infra/handler"
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-type Suite[T model.User | map[string]interface{}] struct {
+type Suite struct {
 	Handler handler2.SQLHandler
-	Data    T
+	Data    []Data
 }
 
-func Setup[T model.User | map[string]interface{}]() *Suite[T] {
+type Data struct {
+	Name string
+	Body map[string]interface{}
+}
+
+func Setup() *Suite {
 	var (
 		handler handler2.SQLHandler
-		s       *Suite[T]
+		s       *Suite
 	)
 
 	dsn := fmt.Sprintf(
@@ -32,7 +36,7 @@ func Setup[T model.User | map[string]interface{}]() *Suite[T] {
 
 	handler = handler2.SQLHandler{Db: db}
 
-	s = &Suite[T]{
+	s = &Suite{
 		Handler: handler,
 	}
 

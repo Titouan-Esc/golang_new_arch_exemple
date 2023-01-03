@@ -39,11 +39,6 @@ func (ui *UserInteractor) Destroy(uid string) (id string, err error) {
 	return
 }
 
-func (ui *UserInteractor) Connect(user model.User) (token string, err error) {
-	token, err = ui.UserRepository.Login(user)
-	return
-}
-
 func (ui *UserInteractor) ShowByEmail(mail string) (user model.User, err error) {
 	user, err = ui.UserRepository.FindByEmail(mail)
 	return

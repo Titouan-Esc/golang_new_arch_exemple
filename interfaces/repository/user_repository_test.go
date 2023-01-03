@@ -1,28 +1,54 @@
 package repository
 
 import (
+	"encoding/json"
 	"exemple.com/swagTest/domain/model"
 	"exemple.com/swagTest/middlewares"
 	"exemple.com/swagTest/test"
+	"strings"
 	"testing"
 )
 
-func TestUserRepository_Create(t *testing.T) {
-	suite := test.Setup[model.User]()
+func TestUserRepository(t *testing.T) {
+	suite := test.Setup()
 	repo := NewUserRepository(suite.Handler)
 
-	suite.Data = model.User{
-		Name:     "Jean",
-		Email:    "jean@gmail.com",
-		Password: middlewares.HasPassword("jean"),
+	suite.Data = []test.Data{
+		{
+			Name: "Create",
+			Body: map[string]interface{}{
+				"Name":     "Jean",
+				"Email":    "jean@gmail.com",
+				"Password": middlewares.HasPassword("jean"),
+			},
+		},
+		{
+			Name: "Login",
+			Body: map[string]interface{}{
+				"Email":    "jean@gmail.com",
+				"Password": "jean",
+			},
+		},
 	}
 
-	resp, err := repo.Create(suite.Data)
-	if err != nil {
-		t.Errorf("Failed to insert in db, got: %v\n", err)
-	}
+	for _, value := range suite.Data {
 
-	if resp == "" {
-		t.Error("Failed user id is empty")
+		var user model.User
+		mapByte, _ := json.Marshal(value.Body)
+		json.Unmarshal(mapByte, &user)
+
+		t.Run(value.Name, func(t *testing.T) {
+			switch strings.ToUpper(value.Name) {
+			case "CREATE":
+				resp, err := repo.Create(user)
+				if err != nil {
+					t.Errorf("Failed to insert in db, got: %v\n", err)
+				}
+
+				if resp == "" {
+					t.Error("Failed user id is empty")
+				}
+			}
+		})
 	}
 }

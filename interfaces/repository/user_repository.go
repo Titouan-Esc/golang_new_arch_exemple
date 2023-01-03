@@ -22,11 +22,6 @@ func (u UserRepository) FindByEmail(mail string) (model.User, error) {
 	panic("implement me")
 }
 
-func (u UserRepository) Login(user model.User) (string, error) {
-	// TODO implement me
-	panic("implement me")
-}
-
 func (u UserRepository) Find(uid string) (model.User, error) {
 	// TODO implement me
 	panic("implement me")

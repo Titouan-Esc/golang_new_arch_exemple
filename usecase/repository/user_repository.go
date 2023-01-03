@@ -8,5 +8,4 @@ type UserRepository interface {
 	Create(model model.User) (string, error)
 	Update(model model.User) (string, error)
 	Delete(uid string) (string, error)
-	Login(user model.User) (string, error)
 }
