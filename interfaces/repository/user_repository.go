@@ -18,8 +18,11 @@ func NewUserRepository(sql handler.SQLHandler) *UserRepository {
 }
 
 func (u UserRepository) FindByEmail(mail string) (model.User, error) {
-	// TODO implement me
-	panic("implement me")
+	var user model.User
+	if retour := u.SQLHandler.Db.Table("users").Where("email = ?", mail).First(&user); retour.Error != nil {
+		return model.User{}, retour.Error
+	}
+	return user, nil
 }
 
 func (u UserRepository) Find(uid string) (model.User, error) {
@@ -27,13 +30,13 @@ func (u UserRepository) Find(uid string) (model.User, error) {
 	panic("implement me")
 }
 
-func (u UserRepository) Create(model model.User) (uid string, err error) {
+func (u UserRepository) Create(model model.User) (model.User, error) {
 	model.ID = utils.GenerateId()
 	model.Password = middlewares.HasPassword(model.Password)
 	if retour := u.SQLHandler.Db.Table("users").Save(&model); retour.Error != nil {
-		return "", retour.Error
+		return model, retour.Error
 	}
-	return model.ID, nil
+	return model, nil
 }
 
 func (u UserRepository) Update(model model.User) (string, error) {

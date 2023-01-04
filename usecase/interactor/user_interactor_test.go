@@ -10,7 +10,7 @@ import (
 )
 
 func TestUserInteractor_Store(t *testing.T) {
-	suite := test.Setup[model.User]()
+	suite := test.Setup()
 	ui := NewUserInteractor(suite.Handler)
 
 	suite.Data = []test.Data{
@@ -20,6 +20,12 @@ func TestUserInteractor_Store(t *testing.T) {
 				"Name":     "Titouan",
 				"Email":    "titouan@gmail.com",
 				"Password": middlewares.HasPassword("titouan"),
+			},
+		},
+		{
+			Name: "FindEmail",
+			Body: map[string]interface{}{
+				"Email": "oscar@gmail.com",
 			},
 		},
 	}
@@ -39,8 +45,17 @@ func TestUserInteractor_Store(t *testing.T) {
 					t.Errorf("Failed to insert user in db, got: %v\n", err)
 				}
 
-				if resp == "" {
+				if resp.ID == "" {
 					t.Error("Failed user id is empty")
+				}
+			case "FINDEMAIL":
+				resp, err := ui.ShowByEmail(user.Email)
+				if err != nil {
+					t.Errorf("Failed to find user by email, got: %v\n", err)
+				}
+
+				if resp.ID == "" {
+					t.Error("Failed user not found")
 				}
 			}
 		})
