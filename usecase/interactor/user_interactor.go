@@ -19,8 +19,8 @@ func NewUserInteractor(handle handler.SQLHandler) *UserInteractor {
 	}
 }
 
-func (ui *UserInteractor) Store(user model.User) (id string, err error) {
-	id, err = ui.UserRepository.Create(user)
+func (ui *UserInteractor) Store(user model.User) (usr model.User, err error) {
+	usr, err = ui.UserRepository.Create(user)
 	return
 }
 

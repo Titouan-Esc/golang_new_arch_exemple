@@ -25,22 +25,35 @@ func NewUserController(sqlHandler handler.SQLHandler) *UserController {
 }
 
 func (uc *UserController) Store(res http.ResponseWriter, req *http.Request) {
+	response := make(map[string]interface{})
 	manager := controller.NewController[model.User](res, req, false)
 	if manager.Errors.Error {
 		manager.StopRequest()
 		return
 	}
 
-	uid, err := uc.UserInteractor.Store(manager.Body)
+	user, err := uc.UserInteractor.Store(manager.Body)
 	if err != nil {
 		manager.Respons().Build(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	manager.Respons().Build(http.StatusOK, uid)
+	token, err := middlewares.GenerateJWT(user.Email)
+	if err != nil {
+		manager.Respons().Build(http.StatusBadRequest, err.Error())
+	}
+
+	response["id"] = user.ID
+	response["name"] = user.Name
+	response["email"] = user.Email
+	response["token"] = token
+
+	manager.Respons().Build(http.StatusOK, response)
 }
 
 func (uc *UserController) Connect(res http.ResponseWriter, req *http.Request) {
+	response := make(map[string]interface{})
+
 	// Init controller
 	manager := controller.NewController[model.User](res, req, false)
 	if manager.Errors.Error {
@@ -67,7 +80,9 @@ func (uc *UserController) Connect(res http.ResponseWriter, req *http.Request) {
 		manager.Respons().Build(http.StatusConflict, err.Error())
 		return
 	}
-	manager.Respons().Build(http.StatusOK, token)
+
+	response["token"] = token
+	manager.Respons().Build(http.StatusOK, response)
 }
 
 func (uc *UserController) Show(res http.ResponseWriter, req *http.Request) {

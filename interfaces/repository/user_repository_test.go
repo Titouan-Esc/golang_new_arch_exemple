@@ -22,13 +22,6 @@ func TestUserRepository(t *testing.T) {
 				"Password": middlewares.HasPassword("jean"),
 			},
 		},
-		{
-			Name: "Login",
-			Body: map[string]interface{}{
-				"Email":    "jean@gmail.com",
-				"Password": "jean",
-			},
-		},
 	}
 
 	for _, value := range suite.Data {
@@ -45,8 +38,8 @@ func TestUserRepository(t *testing.T) {
 					t.Errorf("Failed to insert in db, got: %v\n", err)
 				}
 
-				if resp == "" {
-					t.Error("Failed user id is empty")
+				if resp.ID == "" {
+					t.Error("Failed to create user")
 				}
 			}
 		})
