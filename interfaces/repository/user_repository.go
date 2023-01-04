@@ -26,12 +26,17 @@ func (u UserRepository) FindByEmail(mail string) (model.User, error) {
 }
 
 func (u UserRepository) Find(uid string) (model.User, error) {
-	// TODO implement me
-	panic("implement me")
+	var user model.User
+	if retour := u.SQLHandler.Db.First(&user, "id = ?", uid); retour.Error != nil {
+		return user, retour.Error
+	}
+	return user, nil
 }
 
 func (u UserRepository) Create(model model.User) (model.User, error) {
-	model.ID = utils.GenerateId()
+	if model.ID == "" {
+		model.ID = utils.GenerateId()
+	}
 	model.Password = middlewares.HasPassword(model.Password)
 	if retour := u.SQLHandler.Db.Table("users").Save(&model); retour.Error != nil {
 		return model, retour.Error
@@ -39,9 +44,11 @@ func (u UserRepository) Create(model model.User) (model.User, error) {
 	return model, nil
 }
 
-func (u UserRepository) Update(model model.User) (string, error) {
-	// TODO implement me
-	panic("implement me")
+func (u UserRepository) Update(user model.User) (string, error) {
+	if retour := u.SQLHandler.Db.Table("users").Save(&user); retour.Error != nil {
+		return "", retour.Error
+	}
+	return user.ID, nil
 }
 
 func (u UserRepository) Delete(uid string) (string, error) {

@@ -19,7 +19,7 @@ func NewSQLHandler() (SQLHandler, error) {
 		"5432",
 		"postgres",
 		"postgres",
-		"test",
+		"golang",
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})

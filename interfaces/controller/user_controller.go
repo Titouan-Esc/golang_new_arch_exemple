@@ -86,6 +86,8 @@ func (uc *UserController) Connect(res http.ResponseWriter, req *http.Request) {
 }
 
 func (uc *UserController) Show(res http.ResponseWriter, req *http.Request) {
+	response := make(map[string]interface{})
+
 	manager := controller.NewController[model.User](res, req)
 	if manager.Errors.Error {
 		manager.StopRequest()
@@ -98,5 +100,33 @@ func (uc *UserController) Show(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	manager.Respons().Build(http.StatusOK, user)
+	response["id"] = user.ID
+	response["name"] = user.Name
+	response["email"] = user.Email
+
+	manager.Respons().Build(http.StatusOK, response)
+}
+
+func (uc *UserController) Modify(res http.ResponseWriter, req *http.Request) {
+
+	manager := controller.NewController[model.User](res, req)
+	if manager.Errors.Error {
+		manager.StopRequest()
+		return
+	}
+
+	user, err := uc.UserInteractor.Show(manager.Body.ID)
+	if err != nil {
+		manager.Respons().Build(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	manager.Bind(&user, manager.Body)
+	uid, err := uc.UserInteractor.Modify(user)
+	if err != nil {
+		manager.Respons().Build(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	manager.Respons().Build(http.StatusOK, uid)
 }
