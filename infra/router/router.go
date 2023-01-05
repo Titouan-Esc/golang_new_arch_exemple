@@ -29,6 +29,7 @@ func Dispatch(sqlHandler handler.SQLHandler) *Router {
 	router.AddRoute("POST", "/user/login", userController.Connect)
 	router.AddRoute("POST", "/user/find", userController.Show)
 	router.AddRoute("POST", "/user/update", userController.Modify)
+	router.AddRoute("POST", "/user/delete", userController.Destroy)
 
 	return &router
 }

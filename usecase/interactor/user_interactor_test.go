@@ -34,7 +34,20 @@ func TestUserInteractor_Store(t *testing.T) {
 		{
 			Name: "Show",
 			Body: map[string]interface{}{
-				"id": userId,
+				"Id": userId,
+			},
+		},
+		{
+			Name: "Modify",
+			Body: map[string]interface{}{
+				"Id":   userId,
+				"Name": "Diego",
+			},
+		},
+		{
+			Name: "Destroy",
+			Body: map[string]interface{}{
+				"Id": userId,
 			},
 		},
 	}
@@ -55,6 +68,10 @@ func TestUserInteractor_Store(t *testing.T) {
 				resp, err = ui.ShowByEmail(user.Email)
 			case "SHOW":
 				resp, err = ui.Show(user.ID)
+			case "MODIFY":
+				resp, err = ui.Modify(user)
+			case "DESTROY":
+				resp, err = ui.Destroy(user)
 			}
 
 			if err != nil {

@@ -44,14 +44,16 @@ func (u UserRepository) Create(model model.User) (model.User, error) {
 	return model, nil
 }
 
-func (u UserRepository) Update(user model.User) (string, error) {
+func (u UserRepository) Update(user model.User) (model.User, error) {
 	if retour := u.SQLHandler.Db.Table("users").Save(&user); retour.Error != nil {
-		return "", retour.Error
+		return model.User{}, retour.Error
 	}
-	return user.ID, nil
+	return user, nil
 }
 
-func (u UserRepository) Delete(uid string) (string, error) {
-	// TODO implement me
-	panic("implement me")
+func (u UserRepository) Delete(user model.User) (model.User, error) {
+	if retour := u.SQLHandler.Db.Table("users").Where("id = ?", user.ID).Delete(&user); retour.Error != nil {
+		return model.User{}, retour.Error
+	}
+	return user, nil
 }

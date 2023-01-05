@@ -37,6 +37,19 @@ func TestUserRepository(t *testing.T) {
 				"Id": userId,
 			},
 		},
+		{
+			Name: "Update",
+			Body: map[string]interface{}{
+				"Id":   userId,
+				"Name": "Diego",
+			},
+		},
+		{
+			Name: "Delete",
+			Body: map[string]interface{}{
+				"Id": userId,
+			},
+		},
 	}
 
 	for _, value := range suite.Data {
@@ -54,6 +67,10 @@ func TestUserRepository(t *testing.T) {
 				resp, err = repo.FindByEmail(user.Email)
 			case "FIND":
 				resp, err = repo.Find(user.ID)
+			case "UPDATE":
+				resp, err = repo.Update(user)
+			case "DELETE":
+				resp, err = repo.Delete(user)
 			}
 
 			if err != nil {

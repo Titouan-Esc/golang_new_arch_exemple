@@ -122,11 +122,27 @@ func (uc *UserController) Modify(res http.ResponseWriter, req *http.Request) {
 	}
 
 	manager.Bind(&user, manager.Body)
-	uid, err := uc.UserInteractor.Modify(user)
+	usr, err := uc.UserInteractor.Modify(user)
 	if err != nil {
 		manager.Respons().Build(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	manager.Respons().Build(http.StatusOK, uid)
+	manager.Respons().Build(http.StatusOK, usr.ID)
+}
+
+func (uc *UserController) Destroy(res http.ResponseWriter, req *http.Request) {
+	manager := controller.NewController[model.User](res, req)
+	if manager.Errors.Error {
+		manager.StopRequest()
+		return
+	}
+
+	user, err := uc.UserInteractor.Destroy(manager.Body)
+	if err != nil {
+		manager.Respons().Build(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	manager.Respons().Build(http.StatusOK, user.ID)
 }

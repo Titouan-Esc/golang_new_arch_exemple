@@ -29,13 +29,13 @@ func (ui *UserInteractor) Show(uid string) (user model.User, err error) {
 	return
 }
 
-func (ui *UserInteractor) Modify(user model.User) (id string, err error) {
-	id, err = ui.UserRepository.Update(user)
+func (ui *UserInteractor) Modify(user model.User) (usr model.User, err error) {
+	usr, err = ui.UserRepository.Update(user)
 	return
 }
 
-func (ui *UserInteractor) Destroy(uid string) (id string, err error) {
-	id, err = ui.UserRepository.Delete(uid)
+func (ui *UserInteractor) Destroy(user model.User) (usr model.User, err error) {
+	usr, err = ui.UserRepository.Delete(user)
 	return
 }
 
