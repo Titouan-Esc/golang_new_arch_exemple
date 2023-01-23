@@ -1,26 +1,32 @@
 package controller
 
 import (
+	"bufio"
 	"exemple.com/swagTest/domain/model"
 	"exemple.com/swagTest/infra/controller"
 	"exemple.com/swagTest/infra/handler"
 	"exemple.com/swagTest/interfaces/repository"
 	"exemple.com/swagTest/middlewares"
+	"exemple.com/swagTest/server"
 	"exemple.com/swagTest/usecase/interactor"
 	"net/http"
+	"os"
+	"strings"
 )
 
 type UserController struct {
 	UserInteractor interactor.UserInteractor
+	Server         *server.Server
 }
 
-func NewUserController(sqlHandler handler.SQLHandler) *UserController {
+func NewUserController(sqlHandler handler.SQLHandler, svr *server.Server) *UserController {
 	return &UserController{
 		UserInteractor: interactor.UserInteractor{
 			UserRepository: &repository.UserRepository{
 				SQLHandler: sqlHandler,
 			},
 		},
+		Server: svr,
 	}
 }
 
@@ -47,6 +53,15 @@ func (uc *UserController) Store(res http.ResponseWriter, req *http.Request) {
 	response["name"] = user.Name
 	response["email"] = user.Email
 	response["token"] = token
+
+	go func() {
+		reader := bufio.NewReader(os.Stdin)
+		for {
+			text, _ := reader.ReadString('\n')
+			text = strings.Replace(text, "\n", "", -1)
+			uc.Server.Send("User Create")
+		}
+	}()
 
 	manager.Respons().Build(http.StatusOK, response)
 }
