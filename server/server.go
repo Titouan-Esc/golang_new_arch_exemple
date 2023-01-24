@@ -1,76 +1,50 @@
 package server
 
 import (
-	"context"
+	"fmt"
 	"net/http"
-	"sync"
+	"time"
 )
 
-type Connection struct {
-	writer     http.ResponseWriter
-	flusher    http.Flusher
-	requestCtx context.Context
-}
+var message chan string
 
-type Server struct {
-	connections      map[string]*Connection
-	connectionsMutex sync.RWMutex
-}
-
-func NewServer() *Server {
-	server := &Server{
-		connections: map[string]*Connection{},
-	}
-	return server
-}
-
-func (s *Server) ServerHTTP(res http.ResponseWriter, req *http.Request) {
+func SseHandler(res http.ResponseWriter, req *http.Request) {
 	flusher, ok := res.(http.Flusher)
 	if !ok {
-		http.Error(res, "Streaming unsupported", http.StatusInternalServerError)
+		http.Error(res, "Error", http.StatusInternalServerError)
 		return
 	}
+	EnableCORS(&res)
 
-	requestContext := req.Context()
-	s.connectionsMutex.Lock()
-	s.connections[req.RemoteAddr] = &Connection{
-		writer:     res,
-		flusher:    flusher,
-		requestCtx: requestContext,
-	}
-	s.connectionsMutex.Unlock()
+	go SendMessage()
 
 	defer func() {
-		s.RemoveConnection(req.RemoteAddr)
+		close(message)
+		message = nil
 	}()
 
-	res.Header().Set("Content-Type", "text/event-stream")
-	res.Header().Set("Cache-Control", "no-cache")
-	res.Header().Set("Connection", "keep-alive")
-	res.Header().Set("Access-Control-Allow-Origin", "*")
-
-	<-requestContext.Done()
-}
-
-func (s *Server) Send(msg string) {
-	s.connectionsMutex.RLock()
-	defer s.connectionsMutex.RUnlock()
-
-	msgBytes := []byte("event: message\n\ndata:" + msg + "\n\n")
-	for client, connection := range s.connections {
-		_, err := connection.writer.Write(msgBytes)
-		if err != nil {
-			s.RemoveConnection(client)
+	for {
+		select {
+		case word := <-message:
+			fmt.Fprintf(res, "time%s\n\n", word)
+			flusher.Flush()
+		case <-req.Context().Done():
 			return
 		}
-
-		connection.flusher.Flush()
 	}
 }
 
-func (s *Server) RemoveConnection(client string) {
-	s.connectionsMutex.Lock()
-	defer s.connectionsMutex.Unlock()
+func SendMessage() {
+	for {
+		ouai := time.Now().Location().String()
+		message <- ouai
+		time.Sleep(3 * time.Second)
+	}
+}
 
-	delete(s.connections, client)
+func EnableCORS(res *http.ResponseWriter) {
+	(*res).Header().Set("Access-Control-Allow-Origin", "*")
+	(*res).Header().Set("Content-Type", "text/event-stream")
+	(*res).Header().Set("Cache-Control", "no-cache")
+	(*res).Header().Set("Connection", "keep-alive")
 }

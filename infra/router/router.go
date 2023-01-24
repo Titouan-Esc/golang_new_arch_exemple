@@ -16,8 +16,7 @@ type Router struct {
 var router = Router{chi.NewRouter()}
 
 func Dispatch(sqlHandler handler.SQLHandler) *Router {
-	svr := server.NewServer()
-	userController := controller.NewUserController(sqlHandler, svr)
+	userController := controller.NewUserController(sqlHandler)
 	router.Handle.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -33,7 +32,7 @@ func Dispatch(sqlHandler handler.SQLHandler) *Router {
 	router.AddRoute("POST", "/user/update", userController.Modify)
 	router.AddRoute("POST", "/user/delete", userController.Destroy)
 
-	router.AddRoute("POST", "/sse/event", svr.ServerHTTP)
+	router.AddRoute("POST", "/sse/event", server.SseHandler)
 
 	return &router
 }
